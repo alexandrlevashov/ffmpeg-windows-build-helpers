@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:19.10
 
 RUN apt-get update && \
     apt-get install -y \
@@ -32,10 +32,11 @@ RUN apt-get update && \
     autoconf-archive \
     p7zip-full \
     ragel \
-    python3-distutils
+    python3-distutils clang lsb-release
+
 
 # copy the entire git dir into the new docker container
 COPY . ./ffmpeg-windows-build-helpers
 
 WORKDIR /ffmpeg-windows-build-helpers
-ENTRYPOINT [ "bash", "./docker/docker-entry.sh" ]
+#ENTRYPOINT [ "bash", "./docker/docker-entry.sh" ]

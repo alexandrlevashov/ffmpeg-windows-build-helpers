@@ -1281,7 +1281,7 @@ build_lame() {
   do_svn_checkout https://svn.code.sf.net/p/lame/svn/trunk/lame lame_svn
   cd lame_svn
     sed -i.bak "1{/^\xef\xbb\xbf$/d}" libmp3lame/i386/nasm.h # Remove a UTF-8 BOM that breaks nasm if it's still there; should be fixed in trunk eventually https://sourceforge.net/p/lame/patches/81/
-    generic_configure "--enable-nasm"
+    generic_configure # "--enable-nasm"
     do_make_and_make_install
   cd ..
 }
@@ -1742,59 +1742,23 @@ build_libx265() {
 
   if [[ $prefer_stable = "n" ]]; then
     local old_hg_version
-    if [[ -d $checkout_dir ]]; then
-      cd $checkout_dir
-      if [[ $git_get_latest = "y" ]]; then
-        echo "doing hg pull -u x265"
-        old_hg_version=`hg --debug id -i`
-        hg pull -u || exit 1
-        hg update || exit 1 # guess you need this too if no new changes are brought down [what the...]
-      else
-        echo "not doing hg pull x265"
-        old_hg_version=`hg --debug id -i`
-      fi
-    else
+
+    rm -rf $checkout_dir
+
       echo "doing hg clone x265"
-      hg clone https://bitbucket.org/multicoreware/x265 $checkout_dir || exit 1
+      git clone https://github.com/videolan/x265 $checkout_dir || exit 1
       cd $checkout_dir
       old_hg_version=none-yet
-    fi
 
-    local new_hg_version=`hg --debug id -i`
-    if [[ "$old_hg_version" != "$new_hg_version" ]]; then
-      echo "got upstream hg changes, forcing rebuild...x265"
-      rm -f 8bit/already* 10bit/already* 12bit/already*
-    else
-      echo "still at hg $new_hg_version x265"
-    fi
   else
     # i.e. prefer_stable == "y" TODO clean this up these two branches are pretty similar...
     local old_hg_version
-    if [[ -d $checkout_dir ]]; then
-      cd $checkout_dir
-      if [[ $git_get_latest = "y" ]]; then
-        echo "doing hg pull -u x265"
-        old_hg_version=`hg --debug id -i`
-        hg pull -u || exit 1
-        hg update || exit 1 # guess you need this too if no new changes are brought down [what the...]
-      else
-        echo "not doing hg pull x265"
-        old_hg_version=`hg --debug id -i`
-      fi
-    else
+      rm -rf $checkout_dir
       echo "doing hg clone x265"
-      hg clone https://bitbucket.org/multicoreware/x265 -r stable $checkout_dir || exit 1
+      git clone https://github.com/videolan/x265 $checkout_dir || exit 1
       cd $checkout_dir
       old_hg_version=none-yet
-    fi
 
-    local new_hg_version=`hg --debug id -i`
-    if [[ "$old_hg_version" != "$new_hg_version" ]]; then
-      echo "got upstream hg changes, forcing rebuild...x265"
-      rm -f 8bit/already* 10bit/already* 12bit/already*
-    else
-      echo "still at hg $new_hg_version x265"
-    fi
   fi # done with prefer_stable = [y|n]
 
 
